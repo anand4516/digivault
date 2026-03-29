@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useCards } from "@/hooks/useCards";
 
 import ContactCard from "@/components/ContactCard";
-import WhatsAppModal from "@/components/WhatsAppModal";
 import EmailModal from "@/components/EmailModal";
 import { BusinessCard } from "@/types/card";
 import { Search, PlusCircle, Grid3X3, List, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
+import { openWhatsAppDirect } from "@/lib/whatsapp";
 
 const Dashboard: React.FC = () => {
   const { cards, loading, toggleFavorite } = useCards();
@@ -15,7 +15,6 @@ const Dashboard: React.FC = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "recent" | "favorites">("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [waCard, setWaCard] = useState<BusinessCard | null>(null);
   const [emailCard, setEmailCard] = useState<BusinessCard | null>(null);
 
   const filtered = useMemo(() => {
@@ -130,14 +129,13 @@ const Dashboard: React.FC = () => {
               onToggleFavorite={toggleFavorite}
               onClick={(c) => navigate(`/card/${c.id}`)}
               onCall={handleCall}
-              onWhatsApp={setWaCard}
+              onWhatsApp={openWhatsAppDirect}
               onEmail={setEmailCard}
             />
           ))}
         </div>
       )}
 
-      {waCard && <WhatsAppModal card={waCard} onClose={() => setWaCard(null)} />}
       {emailCard && <EmailModal card={emailCard} onClose={() => setEmailCard(null)} />}
     </div>
   );

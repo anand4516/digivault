@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { BusinessCard } from "@/types/card";
 import { X, Send } from "lucide-react";
+import { toast } from "sonner";
 
 interface Props {
   card: BusinessCard;
@@ -44,22 +45,54 @@ const WhatsAppModal: React.FC<Props> = ({ card, onClose, userName = "there", use
   };
 
   const handleSend = () => {
-    const cleanPhone = phone.replace(/[^0-9+]/g, "").replace("+", "");
-    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, "_blank");
+    if (!phone) {
+      toast.error("No phone number available");
+      return;
+    }
+    
+    if (!message.trim()) {
+      toast.error("Please enter a message");
+      return;
+    }
+    
+    // Clean phone number: remove all non-numeric characters except +
+    let cleanPhone = phone.replace(/[^0-9+]/g, "");
+    
+    // Remove + from the beginning if present (wa.me doesn't need it in the URL)
+    if (cleanPhone.startsWith("+")) {
+      cleanPhone = cleanPhone.substring(1);
+    }
+    
+    // Validate that we have a valid phone number (at least 10 digits)
+    if (!cleanPhone || cleanPhone.length < 10) {
+      toast.error("Invalid phone number format");
+      return;
+    }
+    
+    // Open WhatsApp with the cleaned phone number
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
+    toast.success("Opening WhatsApp...");
     onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm" onClick={onClose}>
       <div className="glass-panel rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-fade-slide-up" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-5 border-b border-border">
-          <div>
-            <h3 className="font-display font-semibold text-lg">WhatsApp to {card.firstName || card.name}</h3>
-            <p className="text-sm text-muted-foreground font-mono-data">{phone}</p>
+        <div className="p-5 border-b border-border">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-display font-semibold text-lg">WhatsApp to {card.firstName || card.name}</h3>
+              {phone ? (
+                <p className="text-sm text-muted-foreground font-mono-data">{phone}</p>
+              ) : (
+                <p className="text-sm text-destructive">No phone number available</p>
+              )}
+            </div>
+            <button onClick={onClose} className="p-2 hover:bg-secondary rounded-lg transition-colors">
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-secondary rounded-lg transition-colors">
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
         <div className="p-5 space-y-4">

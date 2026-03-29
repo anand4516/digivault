@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCards } from "@/hooks/useCards";
-import WhatsAppModal from "@/components/WhatsAppModal";
 import EmailModal from "@/components/EmailModal";
 import { BusinessCard, INDUSTRY_COLORS } from "@/types/card";
 import {
@@ -10,13 +9,13 @@ import {
   Twitter, Instagram, Building, Briefcase, Tag, Clock, ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
+import { openWhatsAppDirect } from "@/lib/whatsapp";
 
 const CardDetailPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { cards, toggleFavorite, removeCard } = useCards();
   const [card, setCard] = useState<BusinessCard | null>(null);
-  const [showWA, setShowWA] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -66,7 +65,7 @@ const CardDetailPage: React.FC = () => {
 
   const actions = [
     { icon: Phone, label: "Call", color: "text-cv-teal", onClick: handleCall },
-    { icon: MessageCircle, label: "WhatsApp", color: "text-cv-teal", onClick: () => setShowWA(true) },
+    { icon: MessageCircle, label: "WhatsApp", color: "text-cv-teal", onClick: () => openWhatsAppDirect(card) },
     { icon: Mail, label: "Email", color: "text-primary", onClick: () => setShowEmail(true) },
     { icon: MessageSquare, label: "SMS", color: "text-cv-amber", onClick: handleSMS },
     { icon: Share2, label: "Share", color: "text-foreground", onClick: handleShare },
@@ -258,7 +257,6 @@ const CardDetailPage: React.FC = () => {
         </div>
       )}
 
-      {showWA && <WhatsAppModal card={card} onClose={() => setShowWA(false)} />}
       {showEmail && <EmailModal card={card} onClose={() => setShowEmail(false)} />}
     </div>
   );
